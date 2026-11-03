@@ -6,7 +6,12 @@ jobs:
     services:
       postgres:
         image: postgres:17-alpine
-        env: { POSTGRES_USER: stockledger, POSTGRES_PASSWORD: stockledger, POSTGRES_DB: stockledger }
+        env:
+          {
+            POSTGRES_USER: stockledger,
+            POSTGRES_PASSWORD: stockledger,
+            POSTGRES_DB: stockledger,
+          }
         ports: [5432:5432]
         options: >-
           --health-cmd "pg_isready -U stockledger" --health-interval 5s --health-timeout 3s --health-retries 20
@@ -25,13 +30,16 @@ jobs:
           KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
           KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-          KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+          KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v6
-        with: { go-version: '1.27.x' }
+        with: { go-version: "1.27.x" }
       - run: go vet ./...
       - run: go test -race ./...
       - run: go test -tags=integration -race ./internal/...
-        env: { DATABASE_URL: postgresql://stockledger:stockledger@localhost:5432/stockledger?sslmode=disable, REDIS_ADDR: localhost:6379, KAFKA_BROKERS: localhost:9092 }
+        env:
+          DATABASE_URL: "postgresql://stockledger:stockledger@localhost:5432/stockledger?sslmode=disable"
+          REDIS_ADDR: "localhost:6379"
+          KAFKA_BROKERS: "localhost:9092"
       - run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
