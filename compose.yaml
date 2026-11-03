@@ -29,7 +29,7 @@ services:
     depends_on: { postgres: { condition: service_healthy } }
     volumes: ["./migrations:/migrations:ro"]
     environment: { PGPASSWORD: stockledger }
-    command: ["psql", "-h", "postgres", "-U", "stockledger", "-d", "stockledger", "-f", "/migrations/001_init.sql"]
+    command: ["psql", "-h", "postgres", "-U", "stockledger", "-d", "stockledger", "-v", "ON_ERROR_STOP=1", "-f", "/migrations/001_init.sql"]
   api:
     build: .
     command: ["/stockledger"]
