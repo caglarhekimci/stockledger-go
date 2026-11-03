@@ -22,7 +22,7 @@ Metrics are exposed at `/metrics`. Production ingress must restrict probe/metric
 
 ## Persistence and recovery
 
-PostgreSQL uses the Compose named volume. `docker compose down` preserves it; removing volumes destroys local data. Back up with PostgreSQL-aware tooling and test restoration before relying on a deployment. The schema file is initial setup rather than a general migration runner. A production rollout needs versioned forward migrations and a reviewed rollback/restore plan.
+PostgreSQL uses the Compose named volume. `docker compose down` preserves it; removing volumes destroys local data. Back up with PostgreSQL-aware tooling and test restoration before relying on a deployment. The v1 bootstrap is transactional and repeatable against an existing v1 volume; psql stops on SQL errors. It is not a general schema-upgrade runner. A production rollout needs versioned forward migrations and a reviewed rollback/restore plan.
 
 Do not use shared or production databases for integration tests: the fixture resets its configured schema. Tests expect disposable PostgreSQL/Redis/Kafka instances.
 

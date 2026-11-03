@@ -19,3 +19,18 @@ After compatible dependency upgrades, `govulncheck ./...` reported zero reachabl
 Primary verification (2026-11-03, Go1.27.3 Windows): full unit suite, vet, build and pinned govulncheck v1.9.0 passed after final adapter/validation fixes. Vulnerability scan found0 reachable and1 in a required but uncalled module. CI uses current1.27.x patches and exercises the real service tests on Linux. Independent review findings were fixed with regression coverage; local Docker/race limits remain as above.
 
 Final dependency resolution: pinned golang.org/x/crypto to v0.58.1-0.20261009181718-2f1f834330b2, the fixed version named by official advisory GO-2026-5932 (https://pkg.go.dev/vuln/GO-2026-5932). This removes the earlier uncalled-module warning. Fresh full tests, vet and govulncheck now report no vulnerabilities. The source never imports OpenPGP.
+
+## Docker verification — 2026-11-03
+
+[Successful complete-stack Docker run](https://github.com/caglarhekimci/stockledger-go/actions/runs/41560908893), Linux/amd64 in GitHub Actions. Docker is not installed on the local Windows host.
+
+The actual Dockerfile built both static Go executables. Compose then started PostgreSQL, Redis, Kafka, the schema bootstrap, the nonroot API and the worker. The live HTTP smoke verified missing-key denial, item creation, atomic stock changes, idempotent replay and payload conflict, release/confirm terminal behavior, and metrics. All four outbox events were acknowledged in PostgreSQL and read from Kafka with distinct stable keys and correct reservation references.
+
+The test restarted the API, then removed/recreated the full Compose stack while preserving its named database volume. Stock and both reservations survived; the second bootstrap completed without SQL errors. Workflow diagnostics were uploaded and only that run's disposable project/volumes were removed.
+
+RED → GREEN findings from real Docker runs:
+
+- Compose initially failed to parse an unquoted connection string in a flow mapping; explicit environment mappings fixed it.
+- Recreating the stack initially re-ran CREATE statements against existing tables, producing SQL errors. The v1 bootstrap now uses an atomic, repeatable create-if-absent script, and psql stops on any real SQL error. The same smoke passed afterward. This remains a v1 bootstrap, not an upgrade-migration framework.
+
+The normal Linux race and PostgreSQL/Redis/Kafka integration suite also passed after the bootstrap change. Windows containers, Docker Desktop integration and ARM builds were not tested.
