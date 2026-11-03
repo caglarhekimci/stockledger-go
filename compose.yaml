@@ -14,11 +14,29 @@ services:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT_HOST://:9092,PLAINTEXT://:29092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:9092,PLAINTEXT://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_HOST:PLAINTEXT,PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+  migrate:
+    image: postgres:17-alpine
+    depends_on: { postgres: { condition: service_healthy } }
+    volumes: ["./migrations:/migrations:ro"]
+    environment: { PGPASSWORD: stockledger }
+    command: ["psql", "-h", "postgres", "-U", "stockledger", "-d", "stockledger", "-f", "/migrations/001_init.sql"]
+  api:
+    build: .
+    command: ["/stockledger"]
+    depends_on: { migrate: { condition: service_completed_successfully }, redis: { condition: service_started } }
+    environment: { DATABASE_URL: postgresql://stockledger:stockledger@postgres:5432/stockledger?sslmode=disable, REDIS_ADDR: redis:6379, API_KEYS: local-key:demo-tenant, HTTP_ADDR: ":8080" }
+    ports: ["8080:8080"]
+  worker:
+    build: .
+    command: ["/outbox-worker"]
+    depends_on: { migrate: { condition: service_completed_successfully }, kafka: { condition: service_started } }
+    environment: { DATABASE_URL: postgresql://stockledger:stockledger@postgres:5432/stockledger?sslmode=disable, KAFKA_BROKERS: kafka:29092, KAFKA_TOPIC: stockledger.events }

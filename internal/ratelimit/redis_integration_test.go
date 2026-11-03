@@ -32,4 +32,8 @@ func TestRedisLimiterScopesCountersByTenant(t *testing.T) {
 	if err != nil || !ok {
 		t.Fatalf("other tenant %v %v", ok, err)
 	}
+	ttl, err := c.PTTL(context.Background(), "stockledger:rate:a").Result()
+	if err != nil || ttl <= 0 || ttl > time.Minute {
+		t.Fatalf("atomic ttl=%s err=%v", ttl, err)
+	}
 }

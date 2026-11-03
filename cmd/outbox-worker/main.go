@@ -26,7 +26,11 @@ func main() {
 	cfg.Version = sarama.V3_9_0_0
 	cfg.Producer.RequiredAcks = sarama.WaitForAll
 	cfg.Producer.Retry.Max = 3
+	cfg.Producer.Retry.Backoff = 250 * time.Millisecond
 	cfg.Producer.Return.Successes = true
+	cfg.Net.DialTimeout = 5 * time.Second
+	cfg.Net.ReadTimeout = 5 * time.Second
+	cfg.Net.WriteTimeout = 5 * time.Second
 	producer, err := sarama.NewSyncProducer([]string{env("KAFKA_BROKERS", "localhost:9092")}, cfg)
 	if err != nil {
 		panic(err)

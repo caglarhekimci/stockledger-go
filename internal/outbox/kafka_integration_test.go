@@ -5,7 +5,7 @@ package outbox
 import (
 	"context"
 	"github.com/IBM/sarama"
-	"github.com/cags/stockledger/internal/postgres"
+	"github.com/cags/stockledger/internal/app"
 	"os"
 	"testing"
 	"time"
@@ -26,7 +26,7 @@ func TestKafkaPublisherPublishesStableEventID(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer p.Close()
-	if err := (Kafka{Producer: p, Topic: topic}).Publish(context.Background(), postgres.OutboxEvent{ID: "event-1", TenantID: "tenant-a", Type: "reservation.created", Payload: `{"id":"event-1"}`}); err != nil {
+	if err := (Kafka{Producer: p, Topic: topic}).Publish(context.Background(), app.OutboxEvent{ID: "event-1", TenantID: "tenant-a", Type: "reservation.created", Payload: `{"id":"event-1"}`}); err != nil {
 		t.Fatal(err)
 	}
 	consumer, err := sarama.NewConsumer([]string{broker}, cfg)

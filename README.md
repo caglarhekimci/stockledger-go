@@ -4,7 +4,7 @@ StockLedger is a tenant-isolated inventory reservation API. PostgreSQL is the so
 
 ## Run
 
-Start dependencies with `docker compose up -d`, apply `migrations/001_init.sql` with `psql "$DATABASE_URL" -f migrations/001_init.sql`, then set `DATABASE_URL`, `REDIS_ADDR`, and `API_KEYS=local-key:demo-tenant`. Run `go run ./cmd/stockledger`. This repository commits no usable credentials; compose values are local development defaults only.
+Start the complete local stack with `docker compose up --build`. It runs migrations, API, worker, PostgreSQL, Redis, and Kafka. The API is at `http://localhost:8080`; use `X-API-Key: local-key`. For host-process development, set `DATABASE_URL`, `REDIS_ADDR=localhost:6379`, `KAFKA_BROKERS=localhost:9092`, and `API_KEYS=local-key:demo-tenant`. Containers use Kafka's internal `kafka:29092` listener. This repository commits no usable credentials; compose values are local development defaults only.
 
 ## Verify
 

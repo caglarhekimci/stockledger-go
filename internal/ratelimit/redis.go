@@ -16,17 +16,18 @@ type Redis struct {
 	Window time.Duration
 }
 
+var allowScript = redis.NewScript(`
+local n = redis.call('INCR', KEYS[1])
+if n == 1 then redis.call('PEXPIRE', KEYS[1], ARGV[2]) end
+if n <= tonumber(ARGV[1]) then return 1 end
+return 0`)
+
 func (r Redis) Allow(ctx context.Context, tenant string) (bool, error) {
 	key := "stockledger:rate:" + tenant
-	n, err := r.Client.Incr(ctx, key).Result()
+	result, err := allowScript.Run(ctx, r.Client, []string{key}, r.Limit, r.Window.Milliseconds()).Int()
 	if err != nil {
 		return false, err
 	}
-	if n == 1 {
-		if err = r.Client.Expire(ctx, key, r.Window).Err(); err != nil {
-			return false, err
-		}
-	}
-	return n <= r.Limit, nil
+	return result == 1, nil
 }
 func (r Redis) String() string { return fmt.Sprintf("redis limiter (%d/%s)", r.Limit, r.Window) }

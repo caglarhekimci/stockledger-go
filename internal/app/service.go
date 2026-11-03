@@ -7,7 +7,10 @@ import (
 	"github.com/cags/stockledger/internal/domain"
 )
 
-var ErrIdempotencyKeyRequired = errors.New("idempotency key is required")
+var (
+	ErrIdempotencyKeyRequired = errors.New("idempotency key is required")
+	ErrInvalidStock           = errors.New("available stock cannot be negative")
+)
 
 type Item struct {
 	ID, TenantID, SKU string
@@ -17,6 +20,10 @@ type ReserveInput struct {
 	TenantID, ItemID, IdempotencyKey string
 	Quantity                         int
 }
+
+// OutboxEvent is a transport-neutral, leased message. Its ID is the stable
+// consumer-deduplication key; LeaseToken prevents a stale worker acknowledging it.
+type OutboxEvent struct{ ID, TenantID, Type, Payload, LeaseToken string }
 type Repository interface {
 	CreateItem(context.Context, Item) error
 	ListItems(context.Context, string) ([]Item, error)
@@ -27,7 +34,7 @@ type Service struct{ Repo Repository }
 
 func (s Service) CreateItem(ctx context.Context, item Item) error {
 	if item.Available < 0 {
-		return errors.New("available stock cannot be negative")
+		return ErrInvalidStock
 	}
 	return s.Repo.CreateItem(ctx, item)
 }

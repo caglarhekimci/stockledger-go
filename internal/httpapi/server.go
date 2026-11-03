@@ -85,7 +85,11 @@ func (s Server) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := s.Service.CreateItem(r.Context(), app.Item{TenantID: tenant(r), SKU: in.SKU, Available: in.Available}); err != nil {
-		writeErr(w, 400, err.Error())
+		if errors.Is(err, app.ErrInvalidStock) {
+			writeErr(w, 400, "invalid stock")
+			return
+		}
+		writeErr(w, 500, "internal error")
 		return
 	}
 	w.WriteHeader(201)
@@ -108,14 +112,19 @@ func (s Server) reserve(w http.ResponseWriter, r *http.Request) {
 	}
 	res, replay, err := s.Service.Reserve(r.Context(), app.ReserveInput{TenantID: tenant(r), ItemID: in.ItemID, Quantity: in.Quantity, IdempotencyKey: r.Header.Get("Idempotency-Key")})
 	if err != nil {
-		status := 400
-		if errors.Is(err, postgres.ErrInsufficientStock) {
-			status = 409
+		if errors.Is(err, app.ErrIdempotencyKeyRequired) {
+			writeErr(w, 400, "idempotency key required")
+			return
 		}
-		if errors.Is(err, postgres.ErrIdempotencyConflict) {
-			status = 409
+		if errors.Is(err, domain.ErrInvalidQuantity) {
+			writeErr(w, 400, "invalid quantity")
+			return
 		}
-		writeErr(w, status, err.Error())
+		if errors.Is(err, postgres.ErrInsufficientStock) || errors.Is(err, postgres.ErrIdempotencyConflict) {
+			writeErr(w, 409, "reservation conflict")
+			return
+		}
+		writeErr(w, 500, "internal error")
 		return
 	}
 	w.Header().Set("Idempotent-Replay", map[bool]string{true: "true", false: "false"}[replay])
@@ -132,7 +141,15 @@ func (s Server) transition(to domain.ReservationStatus) http.HandlerFunc {
 			res, err = s.Service.Release(r.Context(), tenant(r), chi.URLParam(r, "id"))
 		}
 		if err != nil {
-			writeErr(w, 409, err.Error())
+			if errors.Is(err, postgres.ErrNotFound) {
+				writeErr(w, 404, "reservation not found")
+				return
+			}
+			if errors.Is(err, domain.ErrInvalidTransition) {
+				writeErr(w, 409, "invalid reservation transition")
+				return
+			}
+			writeErr(w, 500, "internal error")
 			return
 		}
 		json.NewEncoder(w).Encode(res)

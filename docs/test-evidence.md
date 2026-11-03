@@ -7,3 +7,5 @@
 2026-11-03 GREEN: `go test ./...`, `go vet ./...`, `go build ./...`, and `git diff --check` completed with exit code 0. `go test -tags=integration -run '^$' ./internal/...` compiled every service-backed test package without running services.
 
 `go test -race ./...` could not run locally because this Windows environment has no C compiler and Go reported `-race requires cgo; enable cgo by setting CGO_ENABLED=1`. PostgreSQL, Redis, and Kafka containers were unavailable locally, so their behavior tests are provided for Linux CI and are not represented as locally executed.
+
+2026-11-03 review-fix regression coverage adds: synchronized same-key reservation replay with one stock decrement/outbox event and payload correlation; concurrent release and confirm-vs-release state-transition tests; real Redis tenant/TTL behavior; Kafka stable-key publication; and an outbox worker test proving failure is not acknowledged and a later pass succeeds. These real-service tests compile locally under the `integration` tag and are run by Linux CI; they were not executed against services locally.
