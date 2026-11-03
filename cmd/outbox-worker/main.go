@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"github.com/IBM/sarama"
-	"github.com/cags/stockledger/internal/outbox"
-	"github.com/cags/stockledger/internal/postgres"
+	"github.com/caglarhekimci/stockledger-go/internal/outbox"
+	"github.com/caglarhekimci/stockledger-go/internal/postgres"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
 	"os"

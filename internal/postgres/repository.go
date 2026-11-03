@@ -6,8 +6,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/cags/stockledger/internal/app"
-	"github.com/cags/stockledger/internal/domain"
+	"github.com/caglarhekimci/stockledger-go/internal/app"
+	"github.com/caglarhekimci/stockledger-go/internal/domain"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -92,7 +92,7 @@ func (r Repository) Reserve(ctx context.Context, in app.ReserveInput) (domain.Re
 		return res, false, err
 	}
 	eventID := uuid.NewString()
-	if _, err = tx.Exec(ctx, `INSERT INTO outbox_events(id,tenant_id,type,payload) VALUES($1,$2,'reservation.created',jsonb_build_object('reservation_id',$3,'item_id',$4,'quantity',$5))`, eventID, in.TenantID, res.ID, in.ItemID, in.Quantity); err != nil {
+	if _, err = tx.Exec(ctx, `INSERT INTO outbox_events(id,tenant_id,type,payload) VALUES($1,$2,'reservation.created',jsonb_build_object('reservation_id',$3::text,'item_id',$4::text,'quantity',$5::integer))`, eventID, in.TenantID, res.ID, in.ItemID, in.Quantity); err != nil {
 		return res, false, err
 	}
 	return res, false, tx.Commit(ctx)
@@ -135,7 +135,7 @@ func (r Repository) Transition(ctx context.Context, t, id string, to domain.Rese
 			return res, err
 		}
 	}
-	if _, err = tx.Exec(ctx, `INSERT INTO outbox_events(id,tenant_id,type,payload) VALUES($1,$2,$3,jsonb_build_object('reservation_id',$4))`, uuid.NewString(), t, "reservation."+string(to), id); err != nil {
+	if _, err = tx.Exec(ctx, `INSERT INTO outbox_events(id,tenant_id,type,payload) VALUES($1,$2,$3,jsonb_build_object('reservation_id',$4::text))`, uuid.NewString(), t, "reservation."+string(to), id); err != nil {
 		return res, err
 	}
 	return res, tx.Commit(ctx)

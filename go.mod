@@ -1,4 +1,4 @@
-module github.com/cags/stockledger
+module github.com/caglarhekimci/stockledger-go
 
 go 1.26.0
 

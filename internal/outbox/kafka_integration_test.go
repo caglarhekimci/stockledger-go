@@ -5,7 +5,7 @@ package outbox
 import (
 	"context"
 	"github.com/IBM/sarama"
-	"github.com/cags/stockledger/internal/app"
+	"github.com/caglarhekimci/stockledger-go/internal/app"
 	"os"
 	"testing"
 	"time"

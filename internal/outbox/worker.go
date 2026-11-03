@@ -3,7 +3,7 @@ package outbox
 import (
 	"context"
 	"github.com/IBM/sarama"
-	"github.com/cags/stockledger/internal/app"
+	"github.com/caglarhekimci/stockledger-go/internal/app"
 	"time"
 )
 
@@ -41,7 +41,6 @@ type Worker struct {
 	Store                                       Store
 	Publisher                                   Publisher
 	Interval, Lease, RetryDelay, PublishTimeout time.Duration
-	BatchSize                                   int
 }
 
 func (w Worker) defaults() Worker {
@@ -56,9 +55,6 @@ func (w Worker) defaults() Worker {
 	}
 	if w.PublishTimeout <= 0 {
 		w.PublishTimeout = 5 * time.Second
-	}
-	if w.BatchSize <= 0 {
-		w.BatchSize = 100
 	}
 	return w
 }
@@ -86,7 +82,9 @@ func (w Worker) Run(ctx context.Context) error {
 }
 func (w Worker) Once(ctx context.Context) error {
 	w = w.defaults()
-	events, err := w.Store.ClaimOutbox(ctx, w.BatchSize, w.Lease)
+	// Claim one event at a time: sequential publication can never consume a
+	// later event's lease. Throughput can be increased safely with more workers.
+	events, err := w.Store.ClaimOutbox(ctx, 1, w.Lease)
 	if err != nil {
 		return err
 	}

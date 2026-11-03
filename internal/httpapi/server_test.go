@@ -3,9 +3,9 @@ package httpapi
 import (
 	"context"
 	"errors"
-	"github.com/cags/stockledger/internal/app"
-	"github.com/cags/stockledger/internal/domain"
-	"github.com/cags/stockledger/internal/postgres"
+	"github.com/caglarhekimci/stockledger-go/internal/app"
+	"github.com/caglarhekimci/stockledger-go/internal/domain"
+	"github.com/caglarhekimci/stockledger-go/internal/postgres"
 	"net/http"
 	"net/http/httptest"
 	"strings"

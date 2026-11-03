@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	"github.com/cags/stockledger/internal/domain"
+	"github.com/caglarhekimci/stockledger-go/internal/domain"
 	"testing"
 )
 

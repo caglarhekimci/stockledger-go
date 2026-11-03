@@ -4,7 +4,7 @@ package app
 import (
 	"context"
 	"errors"
-	"github.com/cags/stockledger/internal/domain"
+	"github.com/caglarhekimci/stockledger-go/internal/domain"
 )
 
 var (

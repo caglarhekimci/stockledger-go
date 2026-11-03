@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"github.com/cags/stockledger/internal/app"
-	"github.com/cags/stockledger/internal/httpapi"
-	"github.com/cags/stockledger/internal/postgres"
-	"github.com/cags/stockledger/internal/ratelimit"
+	"github.com/caglarhekimci/stockledger-go/internal/app"
+	"github.com/caglarhekimci/stockledger-go/internal/httpapi"
+	"github.com/caglarhekimci/stockledger-go/internal/postgres"
+	"github.com/caglarhekimci/stockledger-go/internal/ratelimit"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"log/slog"
