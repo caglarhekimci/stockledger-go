@@ -1,20 +1,227 @@
 openapi: 3.0.3
-info: { title: StockLedger API, version: 1.0.0 }
+info:
+  title: StockLedger API
+  version: 1.0.0
+  description: Tenant-scoped inventory reservations with transactional stock and outbox integrity.
+servers:
+  - url: http://localhost:8080
 paths:
   /v1/items:
-    get: { responses: { '200': { description: Tenant items } } }
-    post: { responses: { '201': { description: Created }, '400': { description: Invalid input } } }
+    get:
+      operationId: listItems
+      summary: List the authenticated tenant's stock
+      responses:
+        "200":
+          description: Tenant items
+          content:
+            application/json:
+              schema:
+                { type: array, items: { $ref: "#/components/schemas/Item" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/InternalError" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+    post:
+      operationId: createItem
+      summary: Create tenant stock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [sku, available]
+              properties:
+                sku: { type: string, minLength: 1, maxLength: 100 }
+                available: { type: integer, minimum: 0, maximum: 2147483647 }
+      responses:
+        "201":
+          { description: Created; obtain the generated item ID from listItems }
+        "400": { $ref: "#/components/responses/InvalidInput" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/InternalError" }
+        "503": { $ref: "#/components/responses/Unavailable" }
   /v1/reservations:
     post:
-      parameters: [{ name: Idempotency-Key, in: header, required: true, schema: { type: string } }]
-      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [item_id, quantity], properties: { item_id: { type: string, format: uuid }, quantity: { type: integer, minimum: 1 } } } } } }
-      responses: { '201': { description: Reserved or replayed }, '409': { description: Insufficient stock or idempotency conflict } }
+      operationId: reserveStock
+      summary: Reserve stock or replay an identical tenant-scoped key
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 128 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [item_id, quantity]
+              properties:
+                item_id: { type: string, format: uuid }
+                quantity: { type: integer, minimum: 1, maximum: 2147483647 }
+      responses:
+        "201":
+          description: Reserved or replayed
+          headers:
+            Idempotent-Replay:
+              description: Whether an existing reservation was replayed
+              schema: { type: boolean }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Reservation" }
+        "400": { $ref: "#/components/responses/InvalidInput" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409":
+          {
+            description: Insufficient stock or idempotency payload conflict,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/Error" } },
+              },
+          }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/InternalError" }
+        "503": { $ref: "#/components/responses/Unavailable" }
   /v1/reservations/{id}/confirm:
-    post: { responses: { '200': { description: Confirmed }, '409': { description: Illegal state } } }
+    parameters: [{ $ref: "#/components/parameters/ReservationId" }]
+    post:
+      operationId: confirmReservation
+      summary: Confirm a pending reservation
+      responses:
+        "200": { $ref: "#/components/responses/ReservationUpdated" }
+        "400": { $ref: "#/components/responses/InvalidInput" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/StateConflict" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/InternalError" }
+        "503": { $ref: "#/components/responses/Unavailable" }
   /v1/reservations/{id}/release:
-    post: { responses: { '200': { description: Released and stock returned }, '409': { description: Illegal state } } }
+    parameters: [{ $ref: "#/components/parameters/ReservationId" }]
+    post:
+      operationId: releaseReservation
+      summary: Release a pending reservation and return stock once
+      responses:
+        "200": { $ref: "#/components/responses/ReservationUpdated" }
+        "400": { $ref: "#/components/responses/InvalidInput" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/StateConflict" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/InternalError" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+  /healthz:
+    get:
+      operationId: liveness
+      summary: Check process liveness
+      security: []
+      responses:
+        "200": { description: API process is alive }
+  /readyz:
+    get:
+      operationId: readiness
+      summary: Check PostgreSQL and Redis readiness
+      security: []
+      responses:
+        "200": { description: PostgreSQL and Redis are reachable }
+        "503": { $ref: "#/components/responses/Unavailable" }
+  /metrics:
+    get:
+      operationId: metrics
+      summary: Read Prometheus metrics
+      security: []
+      responses:
+        "200":
+          {
+            description: Prometheus text metrics; restrict access at deployment ingress,
+          }
 components:
+  parameters:
+    ReservationId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    InvalidInput:
+      {
+        description: 'Invalid or oversized JSON, invalid UUID or numeric bounds',
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/Error" } },
+          },
+      }
+    Unauthorized:
+      {
+        description: Missing or unknown API key,
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/Error" } },
+          },
+      }
+    NotFound:
+      {
+        description: Reservation not found in caller's tenant,
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/Error" } },
+          },
+      }
+    StateConflict:
+      {
+        description: Reservation is no longer pending,
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/Error" } },
+          },
+      }
+    RateLimited:
+      {
+        description: Tenant rate limit exceeded,
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/Error" } },
+          },
+      }
+    InternalError:
+      {
+        description: Dependency failure without internal details,
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/Error" } },
+          },
+      }
+    Unavailable:
+      {
+        description: Dependency unavailable,
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/Error" } },
+          },
+      }
+    ReservationUpdated:
+      description: Updated reservation
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Reservation" }
   schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
     Item:
       type: object
       required: [id, tenant_id, sku, available]
