@@ -1,0 +1,321 @@
+{
+  "checkedAt": "2026-11-03",
+  "timezone": "Europe/Istanbul",
+  "method": "Purposive public indexed LinkedIn sample; cached source freshness limited; not open-vacancy census",
+  "go": [
+    {
+      "id": "G1",
+      "company": "Cimri",
+      "title": "Golang Backend Developer",
+      "location": "İstanbul",
+      "url": "https://tr.linkedin.com/jobs/view/golang-backend-developer-at-cimri-3863565726",
+      "status": "kapalı",
+      "codes": {
+        "SQL": "R",
+        "Redis": "P",
+        "Mesajlasma": "P",
+        "Eszamanlilik": "P",
+        "Docker": "P",
+        "Test": "R",
+        "Izlenebilirlik": "P",
+        "API": "R"
+      },
+      "note": "PostgreSQL, test edilebilir kod ve ölçeklenebilir API sorumlulukları var. Redis ve Kafka tercih listesinde."
+    },
+    {
+      "id": "G2",
+      "company": "Azberry BV",
+      "title": "Golang Developer (Mid-Level) – High-Scale Systems",
+      "location": "Türkiye",
+      "url": "https://tr.linkedin.com/jobs/view/golang-developer-mid-level-%E2%80%93-high-scale-systems-at-azberry-bv-4366341387",
+      "status": "kapalı",
+      "codes": {
+        "SQL": "R",
+        "Redis": "P",
+        "Mesajlasma": "P",
+        "Eszamanlilik": "R",
+        "Docker": "R",
+        "Test": "N",
+        "Izlenebilirlik": "P",
+        "API": "N"
+      },
+      "note": "PostgreSQL, goroutine/channel ve Docker veya Kubernetes deneyimi isteniyor. Redis/Kafka artı; test araçları açıkça belirtilmiyor."
+    },
+    {
+      "id": "G3",
+      "company": "Getir",
+      "title": "Senior Backend Engineer – Go",
+      "location": "İstanbul",
+      "url": "https://tr.linkedin.com/jobs/view/senior-backend-engineer-go-at-getir-4208598273",
+      "status": "kapalı",
+      "codes": {
+        "SQL": "R",
+        "Redis": "N",
+        "Mesajlasma": "R",
+        "Eszamanlilik": "N",
+        "Docker": "R",
+        "Test": "R",
+        "Izlenebilirlik": "R",
+        "API": "R"
+      },
+      "note": "SQL/NoSQL, olay tabanlı mesajlaşma, test ve OpenTelemetry birlikte yer alıyor. Redis adı açıkça yok."
+    },
+    {
+      "id": "G4",
+      "company": "Calico Teknoloji",
+      "title": "Backend Engineer (Golang)",
+      "location": "Ankara",
+      "url": "https://tr.linkedin.com/jobs/view/backend-engineer-golang-at-calico-teknoloji-4439226268",
+      "status": "kapalı",
+      "codes": {
+        "SQL": "R",
+        "Redis": "N",
+        "Mesajlasma": "N",
+        "Eszamanlilik": "R",
+        "Docker": "R",
+        "Test": "R",
+        "Izlenebilirlik": "R",
+        "API": "R"
+      },
+      "note": "Gerçek zamanlı veri motoru; Go eşzamanlılığı, PostgreSQL/ClickHouse, ağ bilgisi, Docker, CI ve kapsamlı test altyapısı. Broker adı olmadığı için mesajlaşma sayılmadı."
+    },
+    {
+      "id": "G5",
+      "company": "Kartaca",
+      "title": "Go Developer",
+      "location": "İstanbul",
+      "url": "https://tr.linkedin.com/jobs/view/go-developer-at-kartaca-4461053757",
+      "status": "kapalı",
+      "codes": {
+        "SQL": "R",
+        "Redis": "P",
+        "Mesajlasma": "P",
+        "Eszamanlilik": "R",
+        "Docker": "N",
+        "Test": "R",
+        "Izlenebilirlik": "N",
+        "API": "R"
+      },
+      "note": "Goroutine/channel, SQL/NoSQL, web servisleri ve test sorumluluğu var. Redis/RabbitMQ/Kafka tercih. Arama özeti açık görünse de ayrıntı sayfası kapalı dedi."
+    },
+    {
+      "id": "G6",
+      "company": "Ahlatcı Holding / Bixcod",
+      "title": "Senior Backend Developer (Go / Golang)",
+      "location": "Üsküdar",
+      "url": "https://tr.linkedin.com/jobs/view/senior-backend-developer-go-golang-at-ahlatc%C4%B1-holding-4352753574",
+      "status": "kapalı",
+      "codes": {
+        "SQL": "R",
+        "Redis": "P",
+        "Mesajlasma": "P",
+        "Eszamanlilik": "R",
+        "Docker": "R",
+        "Test": "R",
+        "Izlenebilirlik": "P",
+        "API": "R"
+      },
+      "note": "PostgreSQL transaction/concurrency, API, Docker ve CI bekleniyor. Redis, broker, gRPC ve izlenebilirlik artı listesinde."
+    },
+    {
+      "id": "G7",
+      "company": "FTech Labs",
+      "title": "Software Engineer – Golang",
+      "location": "Türkiye",
+      "url": "https://tr.linkedin.com/jobs/view/software-engineer-golang-at-ftech-labs-bili%C5%9Fim-a-%C5%9F-3772464893",
+      "status": "kapalı",
+      "codes": {
+        "SQL": "P",
+        "Redis": "P",
+        "Mesajlasma": "P",
+        "Eszamanlilik": "N",
+        "Docker": "P",
+        "Test": "P",
+        "Izlenebilirlik": "N",
+        "API": "P"
+      },
+      "note": "Mikroservis, önbellek ve mesajlaşma prensipleri; PostgreSQL/gRPC ve Redis/SQS/Docker/test deneyimleri avantaj olarak ayrılmış."
+    },
+    {
+      "id": "G8",
+      "company": "Deloitte",
+      "title": "Golang Developer",
+      "location": "İstanbul",
+      "url": "https://tr.linkedin.com/jobs/view/golang-developer-at-deloitte-4462290903",
+      "status": "kapalı",
+      "codes": {
+        "SQL": "R",
+        "Redis": "N",
+        "Mesajlasma": "N",
+        "Eszamanlilik": "R",
+        "Docker": "R",
+        "Test": "R",
+        "Izlenebilirlik": "R",
+        "API": "R"
+      },
+      "note": "Go backend, SQL, concurrency, Docker/Kubernetes, API doğrulama, logging ve test; ayrıca Java/Spring geçmişi isteniyor. Redis varsayılmadı."
+    }
+  ],
+  "next": [
+    {
+      "id": "N1",
+      "company": "zevnika",
+      "title": "Frontend Developer (React / Next.js)",
+      "location": "İstanbul",
+      "url": "https://tr.linkedin.com/jobs/view/frontend-developer-react-next-js-at-zevnika-4483058218",
+      "status": "kapanma ibaresi yok",
+      "codes": {
+        "TypeScript": "R",
+        "React": "R",
+        "API": "R",
+        "State": "R",
+        "Render": "R",
+        "Erisilebilirlik": "R",
+        "Performans": "R",
+        "Test": "P",
+        "Tailwind": "R"
+      },
+      "note": "TypeScript, REST, state araçları, SSR/SSG/App Router ve erişilebilirlik. Otomatik test tercih. Açık olduğu yalnızca kapanma ibaresi yokluğundan kesinleştirilmedi."
+    },
+    {
+      "id": "N2",
+      "company": "TEXIT",
+      "title": "Frontend Developer",
+      "location": "Ankara",
+      "url": "https://tr.linkedin.com/jobs/view/frontend-developer-at-tex%C4%B1t-4339523608",
+      "status": "kapalı",
+      "codes": {
+        "TypeScript": "R",
+        "React": "R",
+        "API": "R",
+        "State": "R",
+        "Render": "R",
+        "Erisilebilirlik": "R",
+        "Performans": "N",
+        "Test": "R",
+        "Tailwind": "P"
+      },
+      "note": "App Router, server/client sınırı, TanStack Query, auth ve form doğrulaması; code review ve temel test süreçleri. Tailwind destekleyici/alternatif araç."
+    },
+    {
+      "id": "N3",
+      "company": "Oculon Systems",
+      "title": "Frontend Developer: React / Next.js / TypeScript",
+      "location": "Türkiye",
+      "url": "https://tr.linkedin.com/jobs/view/frontend-developer-react-next-js-typescr%C4%B1pt-at-oculon-systems-4475307427",
+      "status": "kapalı",
+      "codes": {
+        "TypeScript": "R",
+        "React": "R",
+        "API": "R",
+        "State": "R",
+        "Render": "P",
+        "Erisilebilirlik": "R",
+        "Performans": "R",
+        "Test": "R",
+        "Tailwind": "P"
+      },
+      "note": "Modüler mimari, API sözleşmesi, state, boş/yükleniyor/hata durumları, erişilebilirlik ve test. App Router/RSC avantaj listesinde."
+    },
+    {
+      "id": "N4",
+      "company": "LOOP Digital Signage",
+      "title": "Full Stack Engineer",
+      "location": "İstanbul",
+      "url": "https://tr.linkedin.com/jobs/view/full-stack-engineer-at-loop-digital-signage-4479438399",
+      "status": "kapanma ibaresi yok",
+      "codes": {
+        "TypeScript": "R",
+        "React": "R",
+        "API": "R",
+        "State": "N",
+        "Render": "N",
+        "Erisilebilirlik": "N",
+        "Performans": "R",
+        "Test": "R",
+        "Tailwind": "N"
+      },
+      "note": "Next.js/React TypeScript, Node REST, MongoDB, cloud ve test/CI. Medya pipeline/cihaz güvenilirliği özel alan beklentisi."
+    },
+    {
+      "id": "N5",
+      "company": "Mytech Teknoloji",
+      "title": "Next.js Geliştirici",
+      "location": "İstanbul",
+      "url": "https://tr.linkedin.com/jobs/view/next-js-geli%C5%9Ftirici-at-mytech-teknoloji-yaz%C4%B1l%C4%B1m-anonim-%C5%9Firketi-4282808236",
+      "status": "kapalı",
+      "codes": {
+        "TypeScript": "P",
+        "React": "R",
+        "API": "R",
+        "State": "N",
+        "Render": "R",
+        "Erisilebilirlik": "R",
+        "Performans": "R",
+        "Test": "P",
+        "Tailwind": "N"
+      },
+      "note": "App Router, RSC, Server Actions/Route Handler, caching ve render modları zorunlu. TypeScript ve test araçları tercih başlığında."
+    },
+    {
+      "id": "N6",
+      "company": "Alpaco",
+      "title": "Frontend Developer (Next.js / React)",
+      "location": "İstanbul",
+      "url": "https://tr.linkedin.com/jobs/view/frontend-developer-next-js-react-at-alpaco-4379848576",
+      "status": "kapalı",
+      "codes": {
+        "TypeScript": "R",
+        "React": "R",
+        "API": "R",
+        "State": "R",
+        "Render": "P",
+        "Erisilebilirlik": "N",
+        "Performans": "R",
+        "Test": "R",
+        "Tailwind": "N"
+      },
+      "note": "TypeScript, REST/GraphQL, state, yeniden kullanılabilir UI ve test süreçleri. SSR/SSG ve tasarım sistemi artı."
+    },
+    {
+      "id": "N7",
+      "company": "EKOS.AI",
+      "title": "Frontend Engineer (React/Next.js – Pages Router)",
+      "location": "Türkiye / İstanbul",
+      "url": "https://tr.linkedin.com/jobs/view/frontend-engineer-react-next-js-%E2%80%93-pages-router-at-ekos-a%C4%B1-4265468882",
+      "status": "kapalı",
+      "codes": {
+        "TypeScript": "R",
+        "React": "R",
+        "API": "N",
+        "State": "R",
+        "Render": "R",
+        "Erisilebilirlik": "R",
+        "Performans": "R",
+        "Test": "N",
+        "Tailwind": "R"
+      },
+      "note": "Pages Router, SSR/CSR, TanStack Query, Tailwind/MUI, bileşen mimarisi ve erişilebilirlik. Modern Next.js her ilanda yalnız App Router demek değil."
+    },
+    {
+      "id": "N8",
+      "company": "Wearon Studio",
+      "title": "Full Stack Developer",
+      "location": "Pendik",
+      "url": "https://tr.linkedin.com/jobs/view/full-stack-developer-at-wearon-studio-4339764305",
+      "status": "kapalı",
+      "codes": {
+        "TypeScript": "R",
+        "React": "R",
+        "API": "P",
+        "State": "N",
+        "Render": "N",
+        "Erisilebilirlik": "N",
+        "Performans": "N",
+        "Test": "N",
+        "Tailwind": "N"
+      },
+      "note": "Next.js/TypeScript ve PostgreSQL merkezli ürün sahipliği. Supabase ve görsel/video model API deneyimi tercih. React veya Next.js alternatifli anlatılıyor."
+    }
+  ]
+}
