@@ -1,0 +1,18 @@
+openapi: 3.0.3
+info: { title: StockLedger API, version: 1.0.0 }
+paths:
+  /v1/items:
+    get: { responses: { '200': { description: Tenant items } } }
+    post: { responses: { '201': { description: Created }, '400': { description: Invalid input } } }
+  /v1/reservations:
+    post:
+      parameters: [{ name: Idempotency-Key, in: header, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [item_id, quantity], properties: { item_id: { type: string, format: uuid }, quantity: { type: integer, minimum: 1 } } } } } }
+      responses: { '201': { description: Reserved or replayed }, '409': { description: Insufficient stock or idempotency conflict } }
+  /v1/reservations/{id}/confirm:
+    post: { responses: { '200': { description: Confirmed }, '409': { description: Illegal state } } }
+  /v1/reservations/{id}/release:
+    post: { responses: { '200': { description: Released and stock returned }, '409': { description: Illegal state } } }
+components:
+  securitySchemes: { ApiKey: { type: apiKey, in: header, name: X-API-Key } }
+security: [{ ApiKey: [] }]
