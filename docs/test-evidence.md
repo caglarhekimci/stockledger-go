@@ -17,3 +17,5 @@ Final review-fix coverage adds a worker lease-budget regression: it asserts sequ
 After compatible dependency upgrades, `govulncheck ./...` reported zero reachable vulnerabilities; it reported one vulnerability in a required module that this code does not call.
 
 Primary verification (2026-11-03, Go1.27.3 Windows): full unit suite, vet, build and pinned govulncheck v1.9.0 passed after final adapter/validation fixes. Vulnerability scan found0 reachable and1 in a required but uncalled module. CI uses current1.27.x patches and exercises the real service tests on Linux. Independent review findings were fixed with regression coverage; local Docker/race limits remain as above.
+
+Final dependency resolution: pinned golang.org/x/crypto to v0.58.1-0.20261009181718-2f1f834330b2, the fixed version named by official advisory GO-2026-5932 (https://pkg.go.dev/vuln/GO-2026-5932). This removes the earlier uncalled-module warning. Fresh full tests, vet and govulncheck now report no vulnerabilities. The source never imports OpenPGP.
