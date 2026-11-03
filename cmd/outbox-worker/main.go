@@ -35,6 +35,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer producer.Close()
 	worker := outbox.Worker{Store: postgres.Repository{Pool: pool}, Publisher: outbox.Kafka{Producer: producer, Topic: env("KAFKA_TOPIC", "stockledger.events")}, Interval: time.Second}
 	slog.Info("outbox worker started")
 	if err := worker.Run(ctx); err != nil && err != context.Canceled {

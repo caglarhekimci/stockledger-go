@@ -15,9 +15,11 @@ import (
 )
 
 var (
-	ErrInsufficientStock   = errors.New("insufficient stock")
-	ErrIdempotencyConflict = errors.New("idempotency key payload conflict")
-	ErrNotFound            = errors.New("not found")
+	// Aliases keep adapter-focused integration tests readable; application owns
+	// these classifications so transports do not depend on this adapter.
+	ErrInsufficientStock   = app.ErrInsufficientStock
+	ErrIdempotencyConflict = app.ErrIdempotencyConflict
+	ErrNotFound            = app.ErrNotFound
 )
 
 type Repository struct{ Pool *pgxpool.Pool }

@@ -3,6 +3,7 @@ services:
     image: postgres:17-alpine
     environment: { POSTGRES_USER: stockledger, POSTGRES_PASSWORD: stockledger, POSTGRES_DB: stockledger }
     ports: ["5432:5432"]
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
     healthcheck: { test: ["CMD-SHELL", "pg_isready -U stockledger"], interval: 5s, timeout: 3s, retries: 20 }
   redis:
     image: redis:7-alpine
@@ -38,5 +39,8 @@ services:
   worker:
     build: .
     command: ["/outbox-worker"]
+    restart: on-failure
     depends_on: { migrate: { condition: service_completed_successfully }, kafka: { condition: service_started } }
     environment: { DATABASE_URL: postgresql://stockledger:stockledger@postgres:5432/stockledger?sslmode=disable, KAFKA_BROKERS: kafka:29092, KAFKA_TOPIC: stockledger.events }
+volumes:
+  postgres_data:

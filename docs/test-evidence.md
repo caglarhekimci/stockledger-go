@@ -11,3 +11,7 @@
 2026-11-03 review-fix regression coverage adds: synchronized same-key reservation replay with one stock decrement/outbox event and payload correlation; concurrent release and confirm-vs-release state-transition tests; real Redis tenant/TTL behavior; Kafka stable-key publication; and an outbox worker test proving failure is not acknowledged and a later pass succeeds. These real-service tests compile locally under the `integration` tag and are run by Linux CI; they were not executed against services locally.
 
 Final review-fix coverage adds a worker lease-budget regression: it asserts sequential processing claims exactly one event, so the 5-second publish timeout remains inside the 30-second lease regardless of backlog size. PostgreSQL integration tests invoke the JSON outbox expressions against a real database in CI.
+
+2026-11-03 RED/GREEN: the HTTP malformed/range-input test initially received `201` for out-of-range stock; after transport validation it passes. The snake_case response contract test initially returned Go field names such as `ItemID`; after explicit JSON tags it passes.
+
+After compatible dependency upgrades, `govulncheck ./...` reported zero reachable vulnerabilities; it reported one vulnerability in a required module that this code does not call.

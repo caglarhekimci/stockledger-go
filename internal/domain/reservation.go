@@ -20,10 +20,12 @@ const (
 )
 
 type Reservation struct {
-	ID, TenantID, ItemID string
-	Quantity             int
-	Status               ReservationStatus
-	CreatedAt            time.Time
+	ID        string            `json:"id"`
+	TenantID  string            `json:"tenant_id"`
+	ItemID    string            `json:"item_id"`
+	Quantity  int               `json:"quantity"`
+	Status    ReservationStatus `json:"status"`
+	CreatedAt time.Time         `json:"created_at"`
 }
 
 func NewReservation(tenantID, itemID string, quantity int) (Reservation, error) {

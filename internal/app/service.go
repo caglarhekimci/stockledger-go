@@ -10,11 +10,16 @@ import (
 var (
 	ErrIdempotencyKeyRequired = errors.New("idempotency key is required")
 	ErrInvalidStock           = errors.New("available stock cannot be negative")
+	ErrInsufficientStock      = errors.New("insufficient stock")
+	ErrIdempotencyConflict    = errors.New("idempotency key payload conflict")
+	ErrNotFound               = errors.New("not found")
 )
 
 type Item struct {
-	ID, TenantID, SKU string
-	Available         int
+	ID        string `json:"id"`
+	TenantID  string `json:"tenant_id"`
+	SKU       string `json:"sku"`
+	Available int    `json:"available"`
 }
 type ReserveInput struct {
 	TenantID, ItemID, IdempotencyKey string

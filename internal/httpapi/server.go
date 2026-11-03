@@ -7,12 +7,13 @@ import (
 	"github.com/caglarhekimci/stockledger-go/internal/app"
 	"github.com/caglarhekimci/stockledger-go/internal/domain"
 	"github.com/caglarhekimci/stockledger-go/internal/metrics"
-	"github.com/caglarhekimci/stockledger-go/internal/postgres"
 	"github.com/caglarhekimci/stockledger-go/internal/ratelimit"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
+	"io"
 	"net/http"
 	"strings"
-	"time"
+	"unicode/utf8"
 )
 
 type Server struct {
@@ -51,6 +52,8 @@ func (s Server) Router() http.Handler {
 
 type ctxKey struct{}
 
+const maxInt32 = 2147483647
+
 func (s Server) auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		key := r.Header.Get("X-API-Key")
@@ -80,7 +83,8 @@ func (s Server) create(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &in) {
 		return
 	}
-	if strings.TrimSpace(in.SKU) == "" {
+	in.SKU = strings.TrimSpace(in.SKU)
+	if in.SKU == "" || utf8.RuneCountInString(in.SKU) > 100 || in.Available < 0 || in.Available > maxInt32 {
 		writeErr(w, 400, "sku required")
 		return
 	}
@@ -92,7 +96,7 @@ func (s Server) create(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 500, "internal error")
 		return
 	}
-	w.WriteHeader(201)
+	writeJSON(w, 201, map[string]string{"status": "created"})
 }
 func (s Server) list(w http.ResponseWriter, r *http.Request) {
 	x, err := s.Service.ListItems(r.Context(), tenant(r))
@@ -100,7 +104,7 @@ func (s Server) list(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 500, "internal error")
 		return
 	}
-	json.NewEncoder(w).Encode(x)
+	writeJSON(w, http.StatusOK, x)
 }
 func (s Server) reserve(w http.ResponseWriter, r *http.Request) {
 	var in struct {
@@ -108,6 +112,14 @@ func (s Server) reserve(w http.ResponseWriter, r *http.Request) {
 		Quantity int    `json:"quantity"`
 	}
 	if !decode(w, r, &in) {
+		return
+	}
+	if _, err := uuid.Parse(in.ItemID); err != nil || in.Quantity < 1 || in.Quantity > maxInt32 {
+		writeErr(w, 400, "invalid reservation input")
+		return
+	}
+	if !validIdempotencyKey(r.Header.Get("Idempotency-Key")) {
+		writeErr(w, 400, "invalid idempotency key")
 		return
 	}
 	res, replay, err := s.Service.Reserve(r.Context(), app.ReserveInput{TenantID: tenant(r), ItemID: in.ItemID, Quantity: in.Quantity, IdempotencyKey: r.Header.Get("Idempotency-Key")})
@@ -120,7 +132,7 @@ func (s Server) reserve(w http.ResponseWriter, r *http.Request) {
 			writeErr(w, 400, "invalid quantity")
 			return
 		}
-		if errors.Is(err, postgres.ErrInsufficientStock) || errors.Is(err, postgres.ErrIdempotencyConflict) {
+		if errors.Is(err, app.ErrInsufficientStock) || errors.Is(err, app.ErrIdempotencyConflict) {
 			writeErr(w, 409, "reservation conflict")
 			return
 		}
@@ -128,11 +140,14 @@ func (s Server) reserve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Idempotent-Replay", map[bool]string{true: "true", false: "false"}[replay])
-	w.WriteHeader(201)
-	json.NewEncoder(w).Encode(res)
+	writeJSON(w, 201, res)
 }
 func (s Server) transition(to domain.ReservationStatus) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if _, err := uuid.Parse(chi.URLParam(r, "id")); err != nil {
+			writeErr(w, 400, "invalid reservation id")
+			return
+		}
 		var res domain.Reservation
 		var err error
 		if to == domain.ReservationConfirmed {
@@ -141,7 +156,7 @@ func (s Server) transition(to domain.ReservationStatus) http.HandlerFunc {
 			res, err = s.Service.Release(r.Context(), tenant(r), chi.URLParam(r, "id"))
 		}
 		if err != nil {
-			if errors.Is(err, postgres.ErrNotFound) {
+			if errors.Is(err, app.ErrNotFound) {
 				writeErr(w, 404, "reservation not found")
 				return
 			}
@@ -152,7 +167,7 @@ func (s Server) transition(to domain.ReservationStatus) http.HandlerFunc {
 			writeErr(w, 500, "internal error")
 			return
 		}
-		json.NewEncoder(w).Encode(res)
+		writeJSON(w, http.StatusOK, res)
 	}
 }
 func (s Server) confirm(w http.ResponseWriter, r *http.Request) {
@@ -164,16 +179,36 @@ func (s Server) release(w http.ResponseWriter, r *http.Request) {
 func decode(w http.ResponseWriter, r *http.Request, v any) bool {
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
 	defer r.Body.Close()
-	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(v); err != nil {
+		writeErr(w, 400, "invalid json")
+		return false
+	}
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
 		writeErr(w, 400, "invalid json")
 		return false
 	}
 	return true
+}
+func validIdempotencyKey(key string) bool {
+	if len(key) < 1 || len(key) > 128 {
+		return false
+	}
+	for _, r := range key {
+		if !(r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '-' || r == '_' || r == '.' || r == ':') {
+			return false
+		}
+	}
+	return true
+}
+func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(v)
 }
 func writeErr(w http.ResponseWriter, status int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]string{"error": msg})
 }
-
-var _ = time.Second
